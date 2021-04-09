@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>10</integer>
+	<key>logs</key>
+	<dict>
+		<key>6C846C04-BF47-48BF-A0FD-C638A9BF6ACF</key>
+		<dict>
+			<key>className</key>
+			<string>IDEActivityLogSection</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>6C846C04-BF47-48BF-A0FD-C638A9BF6ACF.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>p4-drone project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>p4-drone</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Build p4-drone</string>
+			<key>timeStartedRecording</key>
+			<real>639620969.76843703</real>
+			<key>timeStoppedRecording</key>
+			<real>639620971.289922</real>
+			<key>title</key>
+			<string>Build p4-drone</string>
+			<key>uniqueIdentifier</key>
+			<string>6C846C04-BF47-48BF-A0FD-C638A9BF6ACF</string>
+		</dict>
+		<key>70AA9FC8-53B6-42AC-8AAC-C80A53A53509</key>
+		<dict>
+			<key>className</key>
+			<string>IDEActivityLogSection</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>70AA9FC8-53B6-42AC-8AAC-C80A53A53509.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>p4-drone project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>p4-drone</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Build p4-drone</string>
+			<key>timeStartedRecording</key>
+			<real>639621265.24359906</real>
+			<key>timeStoppedRecording</key>
+			<real>639621265.34965396</real>
+			<key>title</key>
+			<string>Build p4-drone</string>
+			<key>uniqueIdentifier</key>
+			<string>70AA9FC8-53B6-42AC-8AAC-C80A53A53509</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
