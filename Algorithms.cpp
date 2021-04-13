@@ -77,8 +77,11 @@ void Algorithms::processAlgorithm() {
         case Mode::FASTTSP:
             fasttspAlgorithm();
             printFASTTSP();
+            break;
             
-        default:
+        case Mode::OPTTSP:
+            opttspAlgorithm();
+            printOPTTSP();
             break;
     }
 }
@@ -92,16 +95,19 @@ void Algorithms::mstAlgorithm() {
     // Resize the prim table to number of locations.
     primTable.resize(numLocations);
     
-    // Set starting vertex distance to 0.
+    // Set starting vertex 0.
     primTable[0].minEdgeWeight = 0;
     
     int timesTrue = 0;
     int currentVertex = 0;
     double minDistance = INF;
     
+    // Loop until every vertex has been visited.
     while (timesTrue < numLocations) {
         minDistance = INF;
         
+        // From the set of unvisited vertices, choose the vertex k having the
+        // smallest distance to current vertex.
         for (int k = 0; k < numLocations; ++ k) {
             if (primTable[k].isVisited == 0) {
                 if (primTable[k].minEdgeWeight < minDistance) {
@@ -111,21 +117,25 @@ void Algorithms::mstAlgorithm() {
             }
         }
         
+        // Set current vertex visited.
         primTable[currentVertex].isVisited = 1;
         ++ timesTrue;
         
+        // For each vertex w adjacent to curent vertex.
         for (int w = 0; w < numLocations; ++ w) {
             minDistance = calculateDistance(droneLocations[currentVertex], droneLocations[w]);
+            // If it has not been visited.
             if (primTable[w].isVisited == 0) {
+                // It's distance is smaller than (current,w).
                 if (minDistance < primTable[w].minEdgeWeight) {
+                    // Process total weight meanwhile.
                     calculateTotalWeight(w, minDistance);
+                    // Change it's min distance and preceding vertex.
                     primTable[w].minEdgeWeight = minDistance;
                     primTable[w].precedingVertex = currentVertex;
                 }
             }
         }
-        
-        
     }
 }
 
@@ -193,4 +203,18 @@ void Algorithms::printFASTTSP() {
         cout << partialTour[i] << " ";
     }
     cout << "\n";
+}
+
+    // ----------------------------------------------------------------------------
+    //                                   OPTTSP
+    // ----------------------------------------------------------------------------
+
+// Process that creates a optimal Hamiltonian Cycle using genPerms especially.
+void Algorithms::opttspAlgorithm() {
+    
+}
+
+// Print out the results of OPTTSP.
+void Algorithms::printOPTTSP() {
+    
 }

@@ -47,6 +47,16 @@ public:
     // Print out the results of FASTTSP.
     void printFASTTSP();
     
+    // ----------------------------------------------------------------------------
+    //                                   OPTTSP
+    // ----------------------------------------------------------------------------
+    
+    // Process that creates a optimal Hamiltonian Cycle using genPerms especially.
+    void opttspAlgorithm();
+    
+    // Print out the results of OPTTSP.
+    void printOPTTSP();
+    
     
 private:
     
