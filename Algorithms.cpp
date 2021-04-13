@@ -25,21 +25,172 @@ void Algorithms::getOptions(int argc, char** argv) {
     while ((option = getopt_long(argc, argv, "hm:", longOpts, &option_index)) != -1) {
         switch (option) {
             case 'm':
-                // Turns on verbose output mode.
-                mode = *optarg;
+                // Sets the mode of the program to the command argument.
+                // Mode must be "MST", "FASTTSP", or "OPTTSP".
+                // Mode cannot be empty or invalid. Will print error message and exit.
+                setMode(optarg);
                 break;
 
             case 'h':
                 // Print a short description of this program and its arguments.
-                cout << "Find the path for drones according to mode. Valid modes are 'MST', 'FASTTSP', and 'OPTTSP'.\n";
+                cout << "Find the path for drones according to mode. "
+                << "Valid modes are 'MST', 'FASTTSP', and 'OPTTSP'.\n";
                 exit(0);
+                break;
+                
+            default:
+                // Print an error message if command is invalid and exit 1.
+                cerr << "Error: Invalid command line option\n";
+                exit(1);
                 break;
         }
     }
+}
+
+// Reads input describing the locations where pickups and/or deliveries occur.
+void Algorithms::readInput() {
+    // Read in number of locations.
+    cin >> numLocations;
+    // Reserve the vector to number of locations.
+    droneLocations.reserve(numLocations);
+    coordinate temp;
     
-    // Print an error message if no mode was specified and exit 1.
-    if (mode == "") {
-        cout << "Error: No mode specified\n";
-        exit(1);
+    // While a coordinate is being read in.
+    while (cin >> temp.x) {
+        cin >> temp.y;
+        // Set the type of location the coordinate is.
+        temp.location = categorizeLocation(temp.x, temp.y);
+        // Insert into vector.
+        droneLocations.emplace(droneLocations.end(), temp);
     }
+}
+
+// Process which algorithm to use based on the mode given.
+void Algorithms::processAlgorithm() {
+    switch (mode) {
+        case Mode::MST:
+            checkMSTPossible();
+            mstAlgorithm();
+            printMST();
+            break;
+            
+        case Mode::FASTTSP:
+            fasttspAlgorithm();
+            printFASTTSP();
+            
+        default:
+            break;
+    }
+}
+
+    // ----------------------------------------------------------------------------
+    //                                     MST
+    // ----------------------------------------------------------------------------
+
+// Process that creates a minimum spanning tree using linear search.
+void Algorithms::mstAlgorithm() {
+    // Resize the prim table to number of locations.
+    primTable.resize(numLocations);
+    
+    // Set starting vertex distance to 0.
+    primTable[0].minEdgeWeight = 0;
+    
+    int timesTrue = 0;
+    int currentVertex = 0;
+    double minDistance = INF;
+    
+    while (timesTrue < numLocations) {
+        minDistance = INF;
+        
+        for (int k = 0; k < numLocations; ++ k) {
+            if (primTable[k].isVisited == 0) {
+                if (primTable[k].minEdgeWeight < minDistance) {
+                    minDistance = primTable[k].minEdgeWeight;
+                    currentVertex = k;
+                }
+            }
+        }
+        
+        primTable[currentVertex].isVisited = 1;
+        ++ timesTrue;
+        
+        for (int w = 0; w < numLocations; ++ w) {
+            minDistance = calculateDistance(droneLocations[currentVertex], droneLocations[w]);
+            if (primTable[w].isVisited == 0) {
+                if (minDistance < primTable[w].minEdgeWeight) {
+                    calculateTotalWeight(w, minDistance);
+                    primTable[w].minEdgeWeight = minDistance;
+                    primTable[w].precedingVertex = currentVertex;
+                }
+            }
+        }
+        
+        
+    }
+}
+
+// Print out the results of MST.
+void Algorithms::printMST() {
+    cout << totalWeight << "\n";
+    
+    for (int i = 1; i < numLocations; ++ i) {
+        if (i < primTable[i].precedingVertex) {
+            cout << i << " " << primTable[i].precedingVertex << "\n";
+        }
+        else {
+            cout << primTable[i].precedingVertex << " " << i << "\n";
+        }
+    }
+}
+
+    // ----------------------------------------------------------------------------
+    //                                   FASTTSP
+    // ----------------------------------------------------------------------------
+
+// Process that creates a close-to-optimal Hamiltonian Cycle using arbitrary insertion.
+void Algorithms::fasttspAlgorithm() {
+    // Initialization: Start with a partial tour of three cities.
+    partialTour.push_back(0);
+    partialTour.push_back(1);
+    partialTour.push_back(2);
+    
+    double minCost = INF;
+    double newCost = 0;
+    
+    // Selection: Arbitrarily select a city to add to the partial tour.
+    for (int k = 3; k < numLocations; ++ k) {
+        // Record the minimum change in cost of each edge in the partial tour.
+        minCost = calculateNewCost(droneLocations[partialTour[0]], droneLocations[partialTour[1]], droneLocations[k]);
+        uint32_t indexInserting = 1;
+        
+        // Insertion: For each edge in the partial tour, calculate the change in cost if node k were inserted in between.
+        for (size_t m = 1; m < partialTour.size(); ++ m) {
+            newCost = calculateNewCost(droneLocations[partialTour[m]], droneLocations[partialTour[(m + 1) % partialTour.size()]], droneLocations[k]);
+            
+            // Insertion: If change in cost is smaller, keep track of new potential edge to insert.
+            if (newCost <= minCost) {
+                minCost = newCost;
+                indexInserting = static_cast<uint32_t>((m + 1));
+            }
+        }
+        // Insertion: Insert at index between i and j.
+        partialTour.insert(partialTour.begin() + indexInserting, k);
+    }
+}
+
+// Print out the results of FASTTSP.
+void Algorithms::printFASTTSP() {
+    // Calculate total weight of cycle.
+    for (int i = 0; i < numLocations; ++ i) {
+        totalWeight += calculateCost(droneLocations[partialTour[i]], droneLocations[partialTour[(i + 1) % numLocations]]);
+    }
+    
+    // Print out total weight.
+    cout << totalWeight << "\n";
+    
+    // Print out each city in partial tour.
+    for (int i = 0; i < numLocations; ++ i) {
+        cout << partialTour[i] << " ";
+    }
+    cout << "\n";
 }
