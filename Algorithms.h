@@ -54,6 +54,8 @@ public:
     // Process that creates a optimal Hamiltonian Cycle using genPerms especially.
     void opttspAlgorithm();
     
+    void genPerms(size_t permLength);
+    
     // Print out the results of OPTTSP.
     void printOPTTSP();
     
@@ -101,6 +103,11 @@ private:
     
     // Vector for TSP location order.
     vector<int> partialTour;
+    
+    // FOR OPTTSP STUFF
+    vector<int> bestPath;
+    double upperBound;
+    vector<vector<double>> distanceMatrix;
     
     // ----------------------------------------------------------------------------
     //                              Helper Functions
@@ -176,6 +183,17 @@ private:
         }
     }
     
+    // Helper function that readjusts total weight in MST algorithm.
+    void calculateMSTWeight(const int w, const double distance, double &mstTotal) {
+        if (primTable[w].minEdgeWeight != INF) {
+            mstTotal -= primTable[w].minEdgeWeight;
+            mstTotal += distance;
+        }
+        else {
+            mstTotal += distance;
+        }
+    }
+    
     // Helper function that determines if an MST can be constructed.
     void checkMSTPossible() {
         if (isNormal && isMedical && !isBorder) {
@@ -194,4 +212,109 @@ private:
     double calculateNewCost(const coordinate& i, const coordinate& j, const coordinate& k) {
         return calculateCost(i, k) + calculateCost(j, k) - calculateCost(i, j);
     }
+    
+    // Helper function that calculates total weight. (TSP)
+    void calculateTotalWeight() {
+        for (int i = 0; i < numLocations; ++ i) {
+            totalWeight += calculateCost(droneLocations[partialTour[i]], droneLocations[partialTour[(i + 1) % numLocations]]);
+        }
+    }
+    
+    // Helper function that sets up the distance matrix to be used in OPT.
+    void processDistanceMatrix() {
+        vector<double> a(numLocations, 0);
+        distanceMatrix.resize(numLocations, a);
+        for (size_t i = 0; i < distanceMatrix.size(); ++ i) {
+            for (size_t j = 0; j < distanceMatrix.size(); ++ j) {
+                distanceMatrix[i][j] = calculateCost(droneLocations[i], droneLocations[j]);
+            }
+        }
+    }
+    
+    bool promising(size_t permLength) {
+        size_t startIndex = permLength;
+        size_t endIndex = partialTour.size();
+        int numUnvisited = static_cast<int>(endIndex - startIndex);
+        double mstTotal = 0;
+        
+        // Resize the prim table to number of locations.
+        primTable.resize(numUnvisited);
+        
+        // Set starting vertex 0.
+        primTable[0].minEdgeWeight = 0;
+        
+        int timesTrue = 0;
+        int currentVertex = 0;
+        double minDistance = INF;
+        
+        // Loop until every vertex has been visited.
+        while (timesTrue < numUnvisited) {
+            minDistance = INF;
+            
+            // From the set of unvisited vertices, choose the vertex k having the
+            // smallest distance to current vertex.
+            for (int k = 0; k < numUnvisited; ++ k) {
+                if (primTable[k].isVisited == 0) {
+                    if (primTable[k].minEdgeWeight < minDistance) {
+                        minDistance = primTable[k].minEdgeWeight;
+                        currentVertex = k;
+                    }
+                }
+            }
+            
+            // Set current vertex visited.
+            primTable[currentVertex].isVisited = 1;
+            ++ timesTrue;
+            
+            // For each vertex w adjacent to curent vertex.
+            for (int w = 0; w < numUnvisited; ++ w) {
+                minDistance = distanceMatrix[partialTour[w + startIndex]][partialTour[currentVertex + startIndex]];
+                // If it has not been visited.
+                if (primTable[w].isVisited == 0) {
+                    // It's distance is smaller than (current,w).
+                    if (minDistance < primTable[w].minEdgeWeight) {
+                        // Process total weight meanwhile.
+                        calculateMSTWeight(w, minDistance, mstTotal);
+                        // Change it's min distance and preceding vertex.
+                        primTable[w].minEdgeWeight = minDistance;
+                        primTable[w].precedingVertex = currentVertex;
+                    }
+                }
+            }
+        }
+        
+        // From the set of unvisited vertices, choose the vertex k having the
+        // smallest distance to current vertex.
+        minDistance = INF;
+        for (int k = 0; k < numUnvisited; ++ k) {
+            if (distanceMatrix[0][partialTour[startIndex]] < minDistance) {
+                minDistance = distanceMatrix[0][partialTour[startIndex]];
+            }
+            ++ startIndex;
+        }
+        mstTotal += minDistance;
+        startIndex = permLength;
+        // From the set of unvisited vertices, choose the vertex k having the
+        // smallest distance to current vertex.
+        minDistance = INF;
+        for (int k = 0; k < numUnvisited; ++ k) {
+            if (distanceMatrix[partialTour[permLength - 1]][partialTour[startIndex]] < minDistance) {
+                minDistance = distanceMatrix[partialTour[permLength - 1]][partialTour[startIndex]];
+            }
+            ++ startIndex;
+        }
+        mstTotal += minDistance;
+        
+        primTable.clear();
+        
+        
+        if (totalWeight + mstTotal < upperBound) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+    
+        
 };

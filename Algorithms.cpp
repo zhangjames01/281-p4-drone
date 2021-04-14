@@ -191,9 +191,7 @@ void Algorithms::fasttspAlgorithm() {
 // Print out the results of FASTTSP.
 void Algorithms::printFASTTSP() {
     // Calculate total weight of cycle.
-    for (int i = 0; i < numLocations; ++ i) {
-        totalWeight += calculateCost(droneLocations[partialTour[i]], droneLocations[partialTour[(i + 1) % numLocations]]);
-    }
+    calculateTotalWeight();
     
     // Print out total weight.
     cout << totalWeight << "\n";
@@ -211,10 +209,64 @@ void Algorithms::printFASTTSP() {
 
 // Process that creates a optimal Hamiltonian Cycle using genPerms especially.
 void Algorithms::opttspAlgorithm() {
+    // Process Distance Matrix.
+    processDistanceMatrix();
+    // Find upper bound.
+    fasttspAlgorithm();
+    calculateTotalWeight();
+    upperBound = totalWeight;
+    bestPath = partialTour;
+   
     
+    totalWeight = 0; // Reset total weight after assigning upper bound
+    size_t permLength = 1;
+    genPerms(permLength);
+    
+    
+    totalWeight = 0;
+    for (int i = 0; i < numLocations; ++ i) {
+        totalWeight += distanceMatrix[bestPath[i]][bestPath[(i + 1) % numLocations]];
+    }
 }
+
+
+void Algorithms::genPerms(size_t permLength) {
+    if (permLength == partialTour.size()) {
+      // Add weight of last edge.
+      totalWeight += distanceMatrix[partialTour[permLength - 1]][0];
+      if (totalWeight < upperBound) {
+          upperBound = totalWeight;
+          bestPath = partialTour;
+      }
+      // Subtract weight of last edge.
+      totalWeight -= distanceMatrix[partialTour[permLength - 1]][0];
+      return;
+    }
+   
+    if (!promising(permLength)) {
+        return;
+    }
+
+    for (size_t i = permLength; i < partialTour.size(); ++ i) {
+        swap(partialTour[permLength], partialTour[i]);
+        totalWeight += distanceMatrix[partialTour[permLength]][partialTour[permLength - 1]];
+        
+        genPerms(permLength + 1);
+        
+        totalWeight -= distanceMatrix[partialTour[permLength]][partialTour[permLength - 1]];
+        swap(partialTour[permLength], partialTour[i]);
+  }
+}
+
 
 // Print out the results of OPTTSP.
 void Algorithms::printOPTTSP() {
+    // Print out total weight.
+    cout << totalWeight << "\n";
     
+    // Print out each city in partial tour.
+    for (int i = 0; i < numLocations; ++ i) {
+        cout << bestPath[i] << " ";
+    }
+    cout << "\n";
 }
